@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3446D8">
+<meta name="color-scheme" content="light dark">
+<title>Sprite Post</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sprite Post">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="boot" class="screen"><div class="spinner" role="status" aria-label="Загрузка"></div></div>
+
+<main id="setup" class="screen" hidden>
+  <div class="card narrow">
+    <h1 class="wordmark">Sprite Post</h1>
+    <p id="setup-text">Сайт ещё не настроен. Откройте файл <code>config.js</code> и впишите адрес и ключ вашего проекта Supabase. Подробности в руководстве, шаг 4.</p>
+  </div>
+</main>
+
+<main id="auth" class="screen" hidden>
+  <div class="card narrow">
+    <div class="brand"><img class="logo" src="icons/icon.svg" alt=""><h1 class="wordmark">Sprite Post</h1></div>
+    <div class="tabs" role="tablist" aria-label="Вход или регистрация">
+      <button type="button" role="tab" id="tab-login" aria-selected="true">Вход</button>
+      <button type="button" role="tab" id="tab-register" aria-selected="false">Регистрация</button>
+    </div>
+
+    <form id="form-login" class="form" novalidate>
+      <label>Почта<input id="login-email" type="email" autocomplete="username" inputmode="email" required></label>
+      <label>Пароль<input id="login-pass" type="password" autocomplete="current-password" required></label>
+      <label class="check"><input id="login-remember" type="checkbox"> Запомнить на этом устройстве</label>
+      <p class="error" id="login-error" role="alert"></p>
+      <button class="btn primary" type="submit">Войти</button>
+    </form>
+
+    <form id="form-register" class="form" hidden novalidate>
+      <label>Имя<input id="reg-name" type="text" maxlength="40" autocomplete="nickname" required></label>
+      <label>Почта<input id="reg-email" type="email" autocomplete="email" inputmode="email" required></label>
+      <fieldset class="roles">
+        <legend>Кто вы в проекте</legend>
+        <label class="role-opt"><input type="radio" name="reg-role" value="developer"><span><b>Разработчик</b><small>Управляет релизами и участниками</small></span></label>
+        <label class="role-opt"><input type="radio" name="reg-role" value="artist" checked><span><b>Художник</b><small>Загружает спрайты, скачивает релизы</small></span></label>
+      </fieldset>
+      <label>Кодовое слово<input id="reg-invite" type="text" autocomplete="off" autocapitalize="off" required></label>
+      <label>Пароль, от 8 символов<input id="reg-pass" type="password" autocomplete="new-password" required></label>
+      <label>Повторите пароль<input id="reg-pass2" type="password" autocomplete="new-password" required></label>
+      <p class="hint">Пароль задаётся один раз. Сменить его можно только после входа по текущему паролю. Восстановить забытый пароль нельзя.</p>
+      <p class="error" id="reg-error" role="alert"></p>
+      <button class="btn primary" type="submit">Создать аккаунт</button>
+    </form>
+  </div>
+</main>
+
+<main id="pending" class="screen" hidden>
+  <div class="card narrow">
+    <h1 class="wordmark">Ждём подтверждения</h1>
+    <p>Аккаунт создан. Разработчик должен подтвердить его в приложении. Страница обновится сама, как только это произойдёт.</p>
+    <div class="row">
+      <button class="btn" id="pending-refresh" type="button">Проверить сейчас</button>
+      <button class="btn ghost" id="pending-logout" type="button">Выйти</button>
+    </div>
+  </div>
+</main>
+
+<div id="welcome" hidden aria-live="polite">
+  <p>Добро пожаловать, <span class="role" id="welcome-role"></span></p>
+</div>
+
+<div id="app" hidden>
+  <header class="top">
+    <div class="brand"><img class="logo" src="icons/icon.svg" alt=""><span class="wordmark">Sprite Post</span></div>
+    <label class="search"><span class="sr">Поиск</span><input id="q" type="search" placeholder="Поиск по чату, файлам и релизам" autocomplete="off" enterkeyhint="search"></label>
+    <div class="who"><span id="who-name"></span><span id="who-role" class="chip"></span></div>
+  </header>
+
+  <nav class="nav" aria-label="Разделы">
+    <button type="button" data-panel="chat" aria-current="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.2A8 8 0 1 1 21 12z"/></svg>
+      <span>Чат</span><i class="dot" id="badge-chat" hidden></i>
+    </button>
+    <button type="button" data-panel="files">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 9"/></svg>
+      <span>Файлы</span><i class="dot" id="badge-files" hidden></i>
+    </button>
+    <button type="button" data-panel="releases">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>
+      <span>Релизы</span><i class="dot" id="badge-releases" hidden></i>
+    </button>
+    <button type="button" data-panel="more">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      <span>Ещё</span><i class="dot" id="badge-more" hidden></i>
+    </button>
+  </nav>
+
+  <div class="panels">
+    <section id="panel-chat" class="panel chat" data-panel="chat">
+      <div id="notif-banner" class="banner" hidden>
+        <span>Включить уведомления о новых сообщениях?</span>
+        <span class="row"><button id="notif-enable" class="btn small primary" type="button">Включить</button><button id="notif-dismiss" class="btn small ghost" type="button">Не сейчас</button></span>
+      </div>
+      <div id="feed" class="feed" aria-live="polite"></div>
+      <form id="composer" class="composer">
+        <div id="replybar" class="replybar" hidden><span id="reply-text"></span><button type="button" id="reply-cancel" class="link">Отменить</button></div>
+        <div id="chips" class="chips" hidden></div>
+        <div class="composer-row">
+          <button type="button" id="attach-btn" class="icon-btn" aria-label="Прикрепить файл">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5L12.5 20a5 5 0 0 1-7-7l9-9a3.5 3.5 0 0 1 5 5l-9 9a2 2 0 0 1-3-3l8-8"/></svg>
+          </button>
+          <input id="attach-input" type="file" multiple hidden>
+          <textarea id="msg-input" rows="1" placeholder="Сообщение" maxlength="2000" enterkeyhint="send"></textarea>
+          <button class="btn primary" id="send-btn" type="submit">Отправить</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="panel-files" class="panel" data-panel="files" hidden>
+      <div class="panel-head">
+        <h2>Файлы</h2>
+        <div class="meter" id="meter"><div class="bar"><i id="meter-fill"></i></div><span id="meter-text"></span></div>
+      </div>
+      <div id="dropzone" class="dropzone">
+        <p>Перетащите файлы сюда или выберите на устройстве</p>
+        <input id="pick-note" type="text" placeholder="Подпись к файлам (необязательно)" maxlength="140" autocomplete="off">
+        <button id="pick-btn" class="btn primary" type="button">Выбрать файлы</button>
+        <input id="pick-input" type="file" multiple hidden>
+        <p id="upload-status" class="hint" role="status"></p>
+      </div>
+      <div id="files-empty" class="empty" hidden></div>
+      <div id="files-grid" class="grid"></div>
+    </section>
+
+    <section id="panel-releases" class="panel" data-panel="releases" hidden>
+      <div class="panel-head"><h2>Релизы</h2><span id="sync-status" class="hint"></span></div>
+      <div id="dev-tools" class="card inline" hidden>
+        <label>Репозиторий игры на GitHub
+          <span class="row"><input id="repo-input" type="text" placeholder="автор/игра" autocomplete="off" autocapitalize="off"><button class="btn" id="repo-save" type="button">Сохранить</button></span>
+        </label>
+        <div class="row"><button class="btn ghost" id="sync-now" type="button">Проверить сейчас</button></div>
+      </div>
+      <div id="rel-empty" class="empty" hidden></div>
+      <div id="rel-list" class="stack"></div>
+    </section>
+
+    <section id="panel-more" class="panel" data-panel="more" hidden>
+      <h2>Аккаунт</h2>
+      <div class="card inline">
+        <div id="acct" class="acct"></div>
+        <div class="row"><button id="logout" class="btn ghost" type="button">Выйти</button></div>
+      </div>
+
+      <h2>Уведомления</h2>
+      <div class="card inline">
+        <p id="notif-state" class="hint"></p>
+        <div class="row"><button id="notif-toggle" class="btn" type="button">Включить уведомления</button></div>
+      </div>
+
+      <h2>Сменить пароль</h2>
+      <form id="form-pass" class="card inline form" novalidate>
+        <label>Текущий пароль<input id="pw-cur" type="password" autocomplete="current-password"></label>
+        <label>Новый пароль, от 8 символов<input id="pw-new" type="password" autocomplete="new-password"></label>
+        <label>Повторите новый пароль<input id="pw-new2" type="password" autocomplete="new-password"></label>
+        <p class="error" id="pw-error" role="alert"></p>
+        <button class="btn" type="submit">Сменить пароль</button>
+      </form>
+
+      <div id="dev-more" hidden>
+        <h2>Участники</h2>
+        <div id="members" class="stack"></div>
+        <h2>Кодовое слово для регистрации</h2>
+        <form id="form-invite" class="card inline form" novalidate>
+          <label>Новое кодовое слово<input id="invite-input" type="text" autocomplete="off" autocapitalize="off" minlength="4"></label>
+          <p id="invite-current" class="hint"></p>
+          <p class="hint">Его нужно знать, чтобы создать аккаунт. Уже зарегистрированных участников это не затрагивает.</p>
+          <button class="btn" type="submit">Сохранить слово</button>
+        </form>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(function () {
+  var LOCAL = "vendor/supabase.js";
+  var CDN = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js";
+  function ready() { return !!(window.supabase && window.supabase.createClient); }
+  function load(src, next) {
+    var s = document.createElement("script");
+    s.src = src;
+    s.onload = function () { if (ready()) start(); else next(); };
+    s.onerror = next;
+    document.head.appendChild(s);
+  }
+  function start() {
+    var m = document.createElement("script");
+    m.type = "module"; m.src = "app.js";
+    document.body.appendChild(m);
+  }
+  function fail() {
+    var boot = document.getElementById("boot");
+    boot.innerHTML = "";
+    var p = document.createElement("p");
+    p.className = "center-text";
+    p.textContent = "Не удалось загрузить библиотеку Supabase. Проверьте интернет или положите файл vendor/supabase.js рядом с сайтом (шаг 5 руководства).";
+    boot.appendChild(p);
+  }
+  load(LOCAL, function () { load(CDN, fail); });
+})();
+</script>
+</body>
+</html>

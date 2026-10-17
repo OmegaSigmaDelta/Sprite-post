@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Sprite Post: руководство по запуску</title>
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<style>
+:root { --bg:#EDEFF7; --surface:#fff; --surface-2:#F4F5FB; --ink:#171A33; --muted:#5A5F7D; --line:#D9DCEB; --accent:#3446D8; --accent-ink:#fff; --warn-bg:#FFF1C2; --warn-ink:#4A3600;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+@media (prefers-color-scheme: dark) { :root { --bg:#11131F; --surface:#1A1D2E; --surface-2:#222640; --ink:#E9EBFA; --muted:#9AA0C4; --line:#2D3250; --accent:#8C9AFF; --accent-ink:#10132A; --warn-bg:#3A3414; --warn-ink:#F6E7A8; } }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 var(--sans); -webkit-text-size-adjust:100%; }
+.wrap { max-width: 780px; margin: 0 auto; padding: max(20px, env(safe-area-inset-top)) 18px 80px; }
+header { display:flex; align-items:center; gap:12px; margin: 8px 0 6px; }
+header img { width:36px; height:36px; image-rendering:pixelated; border-radius:8px; }
+.wordmark { font-family:var(--mono); font-weight:700; letter-spacing:.14em; text-transform:uppercase; font-size:15px; }
+h1 { font-size: 28px; line-height:1.2; margin: 14px 0 8px; }
+.lead { color:var(--muted); margin:0 0 20px; }
+nav.toc { background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:14px 18px; margin: 0 0 28px; }
+nav.toc ol { margin:0; padding-left: 22px; columns: 2 260px; }
+nav.toc a { color:var(--accent); text-decoration:none; }
+nav.toc a:hover { text-decoration:underline; }
+section { background:var(--surface); border:1px solid var(--line); border-radius:12px; padding: 18px 20px; margin: 0 0 16px; scroll-margin-top: 12px; }
+section h2 { font-size:19px; margin:0 0 10px; display:flex; gap:10px; align-items:baseline; }
+section h2 .n { font-family:var(--mono); color:var(--accent); }
+h3 { font-size:16px; margin: 18px 0 6px; }
+p { margin: 8px 0; }
+ul, ol { margin: 8px 0; padding-left: 22px; }
+li { margin: 4px 0; }
+a { color: var(--accent); }
+code { font-family:var(--mono); font-size:.9em; background:var(--surface-2); border:1px solid var(--line); border-radius:4px; padding:0 4px; }
+.code { position:relative; margin: 10px 0; }
+.code pre { margin:0; background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding: 14px; overflow-x:auto; font-size:13px; line-height:1.5; max-height: 420px; }
+.code pre code { background:none; border:0; padding:0; font-size:inherit; }
+.code .cap { position:absolute; left:12px; top:-9px; background:var(--surface); padding:0 6px; font-size:12px; color:var(--muted); }
+.copy { position:absolute; right:8px; top:8px; font: 600 12px var(--sans); border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:8px; padding:6px 10px; cursor:pointer; min-height:30px; }
+.copy:hover { background:var(--surface-2); }
+details.sqlbox { margin: 10px 0; }
+details summary { cursor:pointer; font-weight:600; color:var(--accent); }
+.note { background:var(--warn-bg); color:var(--warn-ink); border-radius:10px; padding:10px 14px; margin: 12px 0; font-size:15px; }
+.opt { font-size:12px; font-weight:600; color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:1px 8px; margin-left:6px; white-space:nowrap; }
+table { width:100%; border-collapse:collapse; font-size:15px; }
+th, td { text-align:left; vertical-align:top; padding:9px 10px; border-bottom:1px solid var(--line); }
+td:first-child { width: 38%; font-weight:600; }
+.scroll { overflow-x:auto; }
+kbd { font-family:var(--mono); font-size:.88em; border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:0 5px; background:var(--surface-2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><img src="icons/icon.svg" alt=""><span class="wordmark">Sprite Post</span></header>
+<h1>Как запустить сайт</h1>
+<p class="lead">Сайт состоит из набора файлов без сборки. Данные (чат, файлы, участники) хранятся в бесплатном Supabase, сами файлы сайта лежат на любом статическом хостинге. На всё уйдёт около получаса. Платить не нужно.</p>
+
+<nav class="toc" aria-label="Содержание"><ol>
+<li><a href="#s1">Что понадобится</a></li>
+<li><a href="#s2">Проект в Supabase</a></li>
+<li><a href="#s3">База данных и вход</a></li>
+<li><a href="#s4">Адрес и ключ в config.js</a></li>
+<li><a href="#s5">Библиотека Supabase</a></li>
+<li><a href="#s6">Проверка на своём компьютере</a></li>
+<li><a href="#s7">Выложить в интернет</a></li>
+<li><a href="#s8">Первый вход и приглашение художника</a></li>
+<li><a href="#s9">Сверка релизов в фоне</a></li>
+<li><a href="#s10">Если что-то не работает</a></li>
+<li><a href="#s11">Хорошо знать</a></li>
+</ol></nav>
+
+<section id="s1"><h2><span class="n">1</span>Что понадобится</h2>
+<ul>
+<li>Бесплатный аккаунт на <a href="https://supabase.com" target="_blank" rel="noopener">supabase.com</a>.</li>
+<li>Место, где будет жить сайт: Netlify, GitHub Pages или Cloudflare Pages (шаг 7). Подойдёт любой, главное чтобы был HTTPS.</li>
+<li>Папка с файлами сайта в таком виде:</li>
+</ul>
+<div class="code"><button type="button" class="copy">Копировать</button><pre><code>sprite-post/
+├── index.html
+├── app.js
+├── config.js          &lt;- сюда впишете адрес и ключ (шаг 4)
+├── styles.css
+├── sw.js
+├── manifest.webmanifest
+├── GUIDE.html         &lt;- это руководство
+├── icons/
+│   ├── icon.svg
+│   ├── icon-192.png
+│   ├── icon-512.png
+│   ├── icon-maskable-512.png
+│   └── apple-touch-icon.png
+├── vendor/
+│   └── supabase.js    &lt;- по желанию (шаг 5)
+└── supabase/
+    ├── schema.sql          &lt;- нужен на шаге 3
+    └── releases-cron.sql   &lt;- нужен на шаге 9, если захотите</code></pre></div>
+<p>Репозиторий игры на GitHub нужен только для вкладки «Релизы». Для остального он не требуется.</p>
+</section>
+
+<section id="s2"><h2><span class="n">2</span>Проект в Supabase</h2>
+<ol>
+<li>Войдите в Supabase и нажмите <b>New project</b>.</li>
+<li>Название любое, например <code>sprite-post</code>. Регион выберите ближайший к вам (для Европы подойдёт Frankfurt).</li>
+<li>Придумайте пароль базы данных и сохраните его. Сайту он не нужен, но восстановить его сложно.</li>
+<li>Нажмите <b>Create new project</b> и подождите пару минут, пока проект подготовится.</li>
+</ol>
+</section>
+
+<section id="s3"><h2><span class="n">3</span>База данных и вход</h2>
+<h3>3а. Таблицы и права</h3>
+<ol>
+<li>В левом меню Supabase откройте <b>SQL Editor</b>, затем <b>New query</b>.</li>
+<li>Откройте файл <code>supabase/schema.sql</code> (или раскройте текст ниже), скопируйте всё содержимое и вставьте в редактор.</li>
+<li>Нажмите <b>Run</b>. Должно появиться сообщение «Success. No rows returned». Если вылезла ошибка, пришлите её текст, а не запускайте скрипт по частям.</li>
+</ol>
+<p>Скрипт создаёт таблицы, правила доступа, хранилище файлов <code>sprites</code> и включает живые обновления. Его можно запускать повторно.</p>
+<details class="sqlbox"><summary>Показать schema.sql</summary><div class="code"><button type="button" class="copy">Копировать</button><pre><code>-- Sprite Post: база данных. Выполняется один раз в Supabase: SQL Editor -&gt; New query -&gt; Run.
+-- Скрипт можно запускать повторно, ничего не сломается.
+
+-- ============ 1. Таблицы ============
+
+create table if not exists public.profiles (
+  id             uuid primary key references auth.users(id) on delete cascade,
+  name           text not null check (char_length(name) between 1 and 40),
+  role           text check (role in (&#x27;developer&#x27;, &#x27;artist&#x27;)),
+  requested_role text not null default &#x27;artist&#x27; check (requested_role in (&#x27;developer&#x27;, &#x27;artist&#x27;)),
+  approved       boolean not null default false,
+  created_at     timestamptz not null default now()
+);
+
+create table if not exists public.files (
+  id          uuid primary key default gen_random_uuid(),
+  uploader    uuid default auth.uid() references public.profiles(id) on delete set null,
+  name        text not null check (char_length(name) between 1 and 120),
+  mime        text,
+  size        bigint not null check (size &gt; 0),
+  path        text not null unique,
+  note        text check (note is null or char_length(note) &lt;= 140),
+  via_message boolean not null default false,
+  created_at  timestamptz not null default now()
+);
+
+create table if not exists public.messages (
+  id         uuid primary key default gen_random_uuid(),
+  author     uuid default auth.uid() references public.profiles(id) on delete set null,
+  body       text check (body is null or char_length(body) &lt;= 2000),
+  file_ids   uuid[],
+  reply_to   uuid,   -- без внешнего ключа: после удаления оригинала в чате видно «сообщение удалено»
+  reply_file uuid,
+  created_at timestamptz not null default now(),
+  check (body is not null or coalesce(array_length(file_ids, 1), 0) &gt; 0),
+  check (coalesce(array_length(file_ids, 1), 0) &lt;= 20)
+);
+create index if not exists messages_created_idx on public.messages (created_at desc);
+create index if not exists files_created_idx on public.files (created_at desc);
+
+create table if not exists public.releases (
+  gh_id        bigint primary key,
+  tag          text not null default &#x27;&#x27;,
+  name         text not null default &#x27;&#x27;,
+  body         text not null default &#x27;&#x27;,
+  prerelease   boolean not null default false,
+  html_url     text not null default &#x27;&#x27;,
+  published_at timestamptz,
+  assets       jsonb not null default &#x27;[]&#x27;::jsonb,
+  shared       boolean not null default false,
+  synced_at    timestamptz
+);
+
+create table if not exists public.settings (
+  key   text primary key,
+  value text
+);
+
+-- ============ 2. Помощники для проверки прав ============
+
+create or replace function public.sp_is_approved() returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.profiles where id = auth.uid() and approved);
+$$;
+
+create or replace function public.sp_is_dev() returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.profiles where id = auth.uid() and approved and role = &#x27;developer&#x27;);
+$$;
+
+-- ============ 3. Регистрация: кодовое слово и первый разработчик ============
+
+create or replace function public.sp_handle_new_user() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare
+  meta  jsonb := coalesce(new.raw_user_meta_data, &#x27;{}&#x27;::jsonb);
+  inv   text;
+  given text;
+  want  text;
+  nm    text;
+begin
+  select value into inv from public.settings where key = &#x27;invite&#x27;;
+  given := lower(trim(coalesce(meta-&gt;&gt;&#x27;invite&#x27;, &#x27;&#x27;)));
+  if inv is null or given = &#x27;&#x27; or given &lt;&gt; lower(trim(inv)) then
+    raise exception &#x27;invalid_invite&#x27;;
+  end if;
+
+  want := case when meta-&gt;&gt;&#x27;role&#x27; = &#x27;developer&#x27; then &#x27;developer&#x27; else &#x27;artist&#x27; end;
+  nm := left(coalesce(nullif(trim(meta-&gt;&gt;&#x27;name&#x27;), &#x27;&#x27;), &#x27;Участник&#x27;), 40);
+
+  if not exists (select 1 from public.profiles where role = &#x27;developer&#x27; and approved) then
+    -- Первый зарегистрированный становится разработчиком сразу.
+    insert into public.profiles (id, name, role, requested_role, approved)
+    values (new.id, nm, &#x27;developer&#x27;, &#x27;developer&#x27;, true);
+  else
+    insert into public.profiles (id, name, role, requested_role, approved)
+    values (new.id, nm, null, want, false);
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists sp_on_auth_user_created on auth.users;
+create trigger sp_on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.sp_handle_new_user();
+
+-- ============ 4. Управление участниками (вызывается из приложения) ============
+
+create or replace function public.set_member(target uuid, do_approve boolean, new_role text default null)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if not public.sp_is_dev() then raise exception &#x27;forbidden&#x27;; end if;
+  if target = auth.uid() then raise exception &#x27;Нельзя менять собственную роль и доступ&#x27;; end if;
+  if do_approve then
+    update public.profiles set approved = true, role = coalesce(new_role, requested_role) where id = target;
+  else
+    update public.profiles set approved = false, requested_role = coalesce(role, requested_role), role = null where id = target;
+  end if;
+end;
+$$;
+
+create or replace function public.remove_member(target uuid)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if not public.sp_is_dev() then raise exception &#x27;forbidden&#x27;; end if;
+  if target = auth.uid() then raise exception &#x27;Нельзя удалить самого себя&#x27;; end if;
+  delete from auth.users where id = target;
+end;
+$$;
+
+revoke all on function public.set_member(uuid, boolean, text) from public, anon;
+revoke all on function public.remove_member(uuid) from public, anon;
+grant execute on function public.set_member(uuid, boolean, text) to authenticated;
+grant execute on function public.remove_member(uuid) to authenticated;
+grant execute on function public.sp_is_approved() to authenticated;
+grant execute on function public.sp_is_dev() to authenticated;
+
+-- ============ 5. Правила для файлов: размер и общий лимит ============
+-- Если меняете лимиты, меняйте и в config.js (STORAGE_LIMIT_MB, MAX_FILE_MB).
+
+create or replace function public.sp_check_file() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  if new.size &gt; 30 * 1048576 then
+    raise exception &#x27;Файл больше 30 МБ&#x27;;
+  end if;
+  if split_part(new.path, &#x27;/&#x27;, 1) &lt;&gt; new.uploader::text then
+    raise exception &#x27;Неверный путь файла&#x27;;
+  end if;
+  if (select coalesce(sum(size), 0) from public.files) + new.size &gt; 900::bigint * 1048576 then
+    raise exception &#x27;storage_quota&#x27;;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists sp_files_check on public.files;
+create trigger sp_files_check before insert on public.files
+  for each row execute function public.sp_check_file();
+
+-- ============ 6. Права доступа к таблицам (RLS) ============
+
+alter table public.profiles enable row level security;
+alter table public.files    enable row level security;
+alter table public.messages enable row level security;
+alter table public.releases enable row level security;
+alter table public.settings enable row level security;
+
+revoke all on public.profiles, public.files, public.messages, public.releases, public.settings from anon;
+grant usage on schema public to authenticated;
+grant select on public.profiles to authenticated;
+grant select, insert, delete on public.files, public.messages to authenticated;
+grant select, insert, update, delete on public.releases, public.settings to authenticated;
+
+-- profiles: свою строку видит каждый, остальных видят подтверждённые (неподтверждённых только разработчик)
+drop policy if exists sp_profiles_select on public.profiles;
+create policy sp_profiles_select on public.profiles for select to authenticated
+  using (id = auth.uid() or (public.sp_is_approved() and (approved or public.sp_is_dev())));
+
+-- messages
+drop policy if exists sp_messages_select on public.messages;
+create policy sp_messages_select on public.messages for select to authenticated
+  using (public.sp_is_approved());
+drop policy if exists sp_messages_insert on public.messages;
+create policy sp_messages_insert on public.messages for insert to authenticated
+  with check (public.sp_is_approved() and author = auth.uid());
+drop policy if exists sp_messages_delete on public.messages;
+create policy sp_messages_delete on public.messages for delete to authenticated
+  using (public.sp_is_approved() and (author = auth.uid() or public.sp_is_dev()));
+
+-- files
+drop policy if exists sp_files_select on public.files;
+create policy sp_files_select on public.files for select to authenticated
+  using (public.sp_is_approved());
+drop policy if exists sp_files_insert on public.files;
+create policy sp_files_insert on public.files for insert to authenticated
+  with check (public.sp_is_approved() and uploader = auth.uid());
+drop policy if exists sp_files_delete on public.files;
+create policy sp_files_delete on public.files for delete to authenticated
+  using (public.sp_is_approved() and (uploader = auth.uid() or public.sp_is_dev()));
+
+-- releases: разработчик видит всё, художник только открытые
+drop policy if exists sp_releases_select on public.releases;
+create policy sp_releases_select on public.releases for select to authenticated
+  using (public.sp_is_dev() or (public.sp_is_approved() and shared));
+drop policy if exists sp_releases_insert on public.releases;
+create policy sp_releases_insert on public.releases for insert to authenticated
+  with check (public.sp_is_dev());
+drop policy if exists sp_releases_update on public.releases;
+create policy sp_releases_update on public.releases for update to authenticated
+  using (public.sp_is_dev()) with check (public.sp_is_dev());
+drop policy if exists sp_releases_delete on public.releases;
+create policy sp_releases_delete on public.releases for delete to authenticated
+  using (public.sp_is_dev());
+
+-- settings: кодовое слово видит только разработчик
+drop policy if exists sp_settings_select on public.settings;
+create policy sp_settings_select on public.settings for select to authenticated
+  using (public.sp_is_approved() and (key &lt;&gt; &#x27;invite&#x27; or public.sp_is_dev()));
+drop policy if exists sp_settings_insert on public.settings;
+create policy sp_settings_insert on public.settings for insert to authenticated
+  with check (public.sp_is_dev());
+drop policy if exists sp_settings_update on public.settings;
+create policy sp_settings_update on public.settings for update to authenticated
+  using (public.sp_is_dev()) with check (public.sp_is_dev());
+drop policy if exists sp_settings_delete on public.settings;
+create policy sp_settings_delete on public.settings for delete to authenticated
+  using (public.sp_is_dev());
+
+-- ============ 7. Хранилище файлов ============
+
+insert into storage.buckets (id, name, public, file_size_limit)
+values (&#x27;sprites&#x27;, &#x27;sprites&#x27;, false, 31457280)
+on conflict (id) do update set public = false, file_size_limit = excluded.file_size_limit;
+
+drop policy if exists sp_storage_select on storage.objects;
+create policy sp_storage_select on storage.objects for select to authenticated
+  using (bucket_id = &#x27;sprites&#x27; and public.sp_is_approved());
+
+drop policy if exists sp_storage_insert on storage.objects;
+create policy sp_storage_insert on storage.objects for insert to authenticated
+  with check (bucket_id = &#x27;sprites&#x27; and public.sp_is_approved()
+              and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists sp_storage_delete on storage.objects;
+create policy sp_storage_delete on storage.objects for delete to authenticated
+  using (bucket_id = &#x27;sprites&#x27; and public.sp_is_approved()
+         and ((storage.foldername(name))[1] = auth.uid()::text or public.sp_is_dev()));
+
+-- ============ 8. Живые обновления (Realtime) ============
+
+do $$
+declare t text;
+begin
+  foreach t in array array[&#x27;messages&#x27;, &#x27;files&#x27;, &#x27;releases&#x27;, &#x27;profiles&#x27;, &#x27;settings&#x27;] loop
+    if not exists (select 1 from pg_publication_tables
+                   where pubname = &#x27;supabase_realtime&#x27; and schemaname = &#x27;public&#x27; and tablename = t) then
+      execute format(&#x27;alter publication supabase_realtime add table public.%I&#x27;, t);
+    end if;
+  end loop;
+end;
+$$;</code></pre></div></details>
+
+<h3>3б. Кодовое слово для регистрации</h3>
+<p>Без кодового слова никто не сможет создать аккаунт. Выполните ещё один запрос, заменив слово на своё (в SQL Editor снова New query):</p>
+<div class="code"><button type="button" class="copy">Копировать</button><pre><code>insert into public.settings (key, value)
+values (&#x27;invite&#x27;, &#x27;моё-кодовое-слово&#x27;)
+on conflict (key) do update set value = excluded.value;</code></pre></div>
+<p>Позже слово можно менять прямо в приложении: вкладка «Ещё», раздел «Кодовое слово для регистрации».</p>
+
+<h3>3в. Отключите подтверждение почты</h3>
+<p>Сайт не отправляет писем, поэтому подтверждение почты нужно выключить, иначе вход не заработает.</p>
+<ol>
+<li>В Supabase откройте <b>Authentication</b>, затем <b>Sign In / Providers</b> и выберите <b>Email</b>.</li>
+<li>Выключите переключатель <b>Confirm email</b>.</li>
+<li>Там же поставьте минимальную длину пароля 8 (необязательно, сайт и так требует 8).</li>
+<li>Нажмите <b>Save</b>.</li>
+</ol>
+<div class="note">Названия пунктов в Supabase иногда меняются. Если не нашли, ищите в разделе Authentication настройки провайдера Email и пункт про подтверждение почты.</div>
+</section>
+
+<section id="s4"><h2><span class="n">4</span>Адрес и ключ в config.js</h2>
+<ol>
+<li>В Supabase откройте <b>Project Settings</b>, затем <b>API Keys</b> (адрес проекта показан там же или в разделе Data API).</li>
+<li>Скопируйте <b>Project URL</b>. Он выглядит как <code>https://abcdefghij.supabase.co</code>.</li>
+<li>Скопируйте <b>Publishable key</b> (начинается с <code>sb_publishable_</code>) либо ключ <b>anon public</b>, если у проекта старый формат.</li>
+<li>Откройте <code>config.js</code> в любом текстовом редакторе и замените только текст в кавычках:</li>
+</ol>
+<div class="code"><span class="cap">config.js</span><button type="button" class="copy">Копировать</button><pre><code>SUPABASE_URL: &quot;https://abcdefghij.supabase.co&quot;,
+SUPABASE_KEY: &quot;sb_publishable_xxxxxxxxxxxxxxxx&quot;,</code></pre></div>
+<div class="note">Ключи <b>secret</b> и <b>service_role</b> вставлять нельзя: они открывают базу целиком. Публичный ключ в этом файле безопасен, потому что доступ защищён правилами из шага 3.</div>
+<p>Здесь же можно поменять репозиторий игры (<code>DEFAULT_REPO</code>) и лимиты. Если меняете лимит хранилища или размер файла, поменяйте и в <code>schema.sql</code> (числа 900 и 30 в разделе 5), иначе сервер будет строже сайта.</p>
+</section>
+
+<section id="s5"><h2><span class="n">5</span>Библиотека Supabase<span class="opt">по желанию</span></h2>
+<p>Сайт сначала ищет файл <code>vendor/supabase.js</code>, а если его нет, берёт библиотеку с сервера jsDelivr. Обычно этого достаточно. Свой файл нужен, если jsDelivr у вас или у художника не открывается.</p>
+<ol>
+<li>Откройте в браузере <a href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" target="_blank" rel="noopener">эту ссылку</a>.</li>
+<li>Сохраните страницу как файл (<kbd>Ctrl</kbd>+<kbd>S</kbd>) под именем <code>supabase.js</code> в папку <code>vendor</code>.</li>
+</ol>
+</section>
+
+<section id="s6"><h2><span class="n">6</span>Проверка на своём компьютере</h2>
+<p>Двойной щелчок по <code>index.html</code> не сработает: браузер блокирует модули при открытии файла напрямую. Нужен маленький локальный сервер. Если на компьютере есть Python, откройте терминал в папке сайта и выполните:</p>
+<div class="code"><button type="button" class="copy">Копировать</button><pre><code>python3 -m http.server 8080</code></pre></div>
+<p>Затем откройте <code>http://localhost:8080</code>. Если вместо формы входа вы видите «Сайт ещё не настроен», проверьте шаг 4. Эту проверку можно пропустить и сразу перейти к шагу 7.</p>
+</section>
+
+<section id="s7"><h2><span class="n">7</span>Выложить в интернет</h2>
+<p>Выберите один способ. Все три бесплатные и дают HTTPS, который нужен для установки на телефон и уведомлений.</p>
+<h3>Вариант А: Netlify Drop (проще всего)</h3>
+<ol>
+<li>Откройте <a href="https://app.netlify.com/drop" target="_blank" rel="noopener">app.netlify.com/drop</a> и войдите.</li>
+<li>Перетащите всю папку сайта в окно. Через несколько секунд получите адрес вида <code>https://что-то.netlify.app</code>.</li>
+<li>Чтобы обновить сайт, перетащите папку заново в раздел Deploys.</li>
+</ol>
+<h3>Вариант Б: GitHub Pages</h3>
+<ol>
+<li>Создайте на GitHub новый репозиторий (публичный) и загрузите в него все файлы сайта: <b>Add file → Upload files</b>.</li>
+<li>Откройте <b>Settings → Pages</b>, в Source выберите <b>Deploy from a branch</b>, ветку <code>main</code> и папку <code>/ (root)</code>, нажмите Save.</li>
+<li>Через минуту-две сайт появится по адресу <code>https://ваше-имя.github.io/название-репозитория/</code>.</li>
+</ol>
+<h3>Вариант В: Cloudflare Pages</h3>
+<p>В Cloudflare откройте <b>Workers &amp; Pages → Create → Pages → Upload assets</b>, перетащите папку сайта и нажмите Deploy.</p>
+<p>Все пути на сайте относительные, поэтому он работает и в подпапке (как на GitHub Pages).</p>
+</section>
+
+<section id="s8"><h2><span class="n">8</span>Первый вход и приглашение художника</h2>
+<ol>
+<li>Откройте адрес сайта, перейдите на вкладку <b>Регистрация</b>.</li>
+<li>Заполните имя, почту, пароль и кодовое слово из шага 3б. <b>Первым должны зарегистрироваться вы:</b> первый человек автоматически становится разработчиком и сразу получает доступ.</li>
+<li>Отправьте художнику адрес сайта и кодовое слово. Лучше передать их разными каналами.</li>
+<li>Художник регистрируется сам. Пока вы его не подтвердили, он видит экран «Ждём подтверждения».</li>
+<li>У вас появится уведомление «Новая заявка». Откройте <b>Ещё → Участники</b> и нажмите «Принять». Роль можно выбрать любую, независимо от того, что человек запросил.</li>
+</ol>
+<h3>Установка на телефон</h3>
+<ul>
+<li><b>Android (Chrome):</b> меню ⋮ → «Установить приложение» или «Добавить на главный экран».</li>
+<li><b>iPhone (Safari):</b> кнопка «Поделиться» → «На экран Домой». Уведомления на iPhone работают только из установленной иконки.</li>
+</ul>
+</section>
+
+<section id="s9"><h2><span class="n">9</span>Сверка релизов в фоне<span class="opt">по желанию</span></h2>
+<p>Без этого шага релизы подтягиваются, когда разработчик открывает сайт, затем раз в 15 минут, пока страница открыта, и по кнопке «Проверить сейчас». Этого достаточно, если вы часто заходите. Чтобы база сама проверяла GitHub круглые сутки:</p>
+<ol>
+<li>В Supabase откройте <b>Database → Extensions</b> и убедитесь, что <code>pg_net</code> и <code>pg_cron</code> включены (скрипт попробует включить их сам).</li>
+<li>В SQL Editor выполните содержимое <code>supabase/releases-cron.sql</code> (или текст ниже).</li>
+<li>В приложении на вкладке «Релизы» укажите репозиторий и нажмите «Сохранить».</li>
+</ol>
+<details class="sqlbox"><summary>Показать releases-cron.sql</summary><div class="code"><button type="button" class="copy">Копировать</button><pre><code>-- Sprite Post: автосверка релизов с GitHub прямо в базе (необязательно, шаг 9 руководства).
+-- Каждые 15 минут база сама спрашивает GitHub и обновляет список релизов,
+-- даже если ни одна страница не открыта. Репозиторий должен быть публичным.
+
+create extension if not exists pg_net with schema extensions;
+create extension if not exists pg_cron;
+
+-- Шаг 1: отправить запрос к GitHub.
+create or replace function public.sp_request_releases() returns void
+language plpgsql security definer set search_path = public, extensions as $$
+declare
+  repo text;
+  rid  bigint;
+begin
+  select coalesce((select value from public.settings where key = &#x27;repo&#x27;),
+                  &#x27;OmegaSigmaDelta/Sierra-Tango-Kasper-Echo&#x27;) into repo;
+  if repo !~ &#x27;^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$&#x27; then return; end if;
+
+  select net.http_get(
+    url := &#x27;https://api.github.com/repos/&#x27; || repo || &#x27;/releases?per_page=30&#x27;,
+    headers := jsonb_build_object(&#x27;Accept&#x27;, &#x27;application/vnd.github+json&#x27;, &#x27;User-Agent&#x27;, &#x27;sprite-post&#x27;)
+  ) into rid;
+
+  insert into public.settings (key, value) values (&#x27;gh_request&#x27;, rid::text)
+  on conflict (key) do update set value = excluded.value;
+end;
+$$;
+
+-- Шаг 2: через пару минут забрать ответ и записать релизы.
+create or replace function public.sp_apply_releases() returns void
+language plpgsql security definer set search_path = public as $$
+declare
+  rid  bigint;
+  resp record;
+  j    jsonb;
+  r    jsonb;
+  ids  bigint[] := &#x27;{}&#x27;;
+  pre  boolean;
+  ast  jsonb;
+begin
+  select value::bigint into rid from public.settings where key = &#x27;gh_request&#x27;;
+  if rid is null then return; end if;
+
+  select status_code, content into resp from net._http_response where id = rid;
+  if not found or resp.status_code is distinct from 200 then return; end if;
+
+  j := resp.content::jsonb;
+  if jsonb_typeof(j) &lt;&gt; &#x27;array&#x27; then return; end if;
+
+  for r in select * from jsonb_array_elements(j) loop
+    if coalesce((r-&gt;&gt;&#x27;draft&#x27;)::boolean, false) then continue; end if;
+    pre := coalesce((r-&gt;&gt;&#x27;prerelease&#x27;)::boolean, false);
+    select coalesce(jsonb_agg(jsonb_build_object(
+             &#x27;name&#x27;, a-&gt;&gt;&#x27;name&#x27;, &#x27;size&#x27;, (a-&gt;&gt;&#x27;size&#x27;)::bigint, &#x27;url&#x27;, a-&gt;&gt;&#x27;browser_download_url&#x27;)), &#x27;[]&#x27;::jsonb)
+      into ast
+      from jsonb_array_elements(coalesce(r-&gt;&#x27;assets&#x27;, &#x27;[]&#x27;::jsonb)) a;
+
+    insert into public.releases (gh_id, tag, name, body, prerelease, html_url, published_at, assets, shared, synced_at)
+    values ((r-&gt;&gt;&#x27;id&#x27;)::bigint, coalesce(r-&gt;&gt;&#x27;tag_name&#x27;, &#x27;&#x27;), coalesce(r-&gt;&gt;&#x27;name&#x27;, &#x27;&#x27;), coalesce(r-&gt;&gt;&#x27;body&#x27;, &#x27;&#x27;),
+            pre, coalesce(r-&gt;&gt;&#x27;html_url&#x27;, &#x27;&#x27;), coalesce(r-&gt;&gt;&#x27;published_at&#x27;, r-&gt;&gt;&#x27;created_at&#x27;)::timestamptz,
+            ast, not pre, now())
+    on conflict (gh_id) do update set
+      tag = excluded.tag, name = excluded.name, body = excluded.body, prerelease = excluded.prerelease,
+      html_url = excluded.html_url, published_at = excluded.published_at, assets = excluded.assets,
+      synced_at = excluded.synced_at;   -- поле shared не трогаем: выбор разработчика сохраняется
+    ids := ids || (r-&gt;&gt;&#x27;id&#x27;)::bigint;
+  end loop;
+
+  if coalesce(array_length(ids, 1), 0) &lt; 30 then
+    delete from public.releases where not (gh_id = any (ids));
+  end if;
+
+  insert into public.settings (key, value) values (&#x27;releases_synced_at&#x27;, to_char(now() at time zone &#x27;utc&#x27;, &#x27;YYYY-MM-DD&quot;T&quot;HH24:MI:SS&quot;Z&quot;&#x27;))
+  on conflict (key) do update set value = excluded.value;
+  delete from public.settings where key = &#x27;gh_request&#x27;;
+end;
+$$;
+
+revoke all on function public.sp_request_releases() from public, anon, authenticated;
+revoke all on function public.sp_apply_releases() from public, anon, authenticated;
+
+-- Расписание: запрос в 0, 15, 30, 45 минут, обработка ответа на 2-й минуте после каждого запроса.
+select cron.schedule(&#x27;sp-releases-request&#x27;, &#x27;*/15 * * * *&#x27;, &#x27;select public.sp_request_releases()&#x27;);
+select cron.schedule(&#x27;sp-releases-apply&#x27;, &#x27;2-59/15 * * * *&#x27;, &#x27;select public.sp_apply_releases()&#x27;);
+
+-- Отключить автосверку:
+--   select cron.unschedule(&#x27;sp-releases-request&#x27;);
+--   select cron.unschedule(&#x27;sp-releases-apply&#x27;);</code></pre></div></details>
+<div class="note">Репозиторий должен быть публичным. GitHub ограничивает анонимные запросы (60 в час с одного адреса, а у серверов Supabase адрес общий), поэтому иногда сверка может не пройти. В следующий раз она повторится сама, а кнопка в приложении работает независимо.</div>
+</section>
+
+<section id="s10"><h2><span class="n">10</span>Если что-то не работает</h2>
+<div class="scroll"><table>
+<thead><tr><th>Что видите</th><th>Что делать</th></tr></thead>
+<tbody>
+<tr><td>Не загрузилась библиотека Supabase</td><td>Нет интернета или jsDelivr заблокирован. Положите файл vendor/supabase.js (шаг 5).</td></tr>
+<tr><td>Профиль не найден. Скорее всего, не выполнен SQL…</td><td>Не выполнен schema.sql или он завершился ошибкой (шаг 3). Выполните его целиком, выйдите из аккаунта и зарегистрируйтесь снова.</td></tr>
+<tr><td>Не удалось создать аккаунт. Проверьте кодовое слово.</td><td>Слово не совпало, либо его не задали в шаге 3б. Регистр букв не важен, пробелы по краям не считаются.</td></tr>
+<tr><td>Аккаунт создан, но Supabase просит подтвердить почту</td><td>Не выключен переключатель Confirm email (шаг 3в). Выключите, удалите этот аккаунт в Authentication → Users и зарегистрируйтесь заново.</td></tr>
+<tr><td>Почта не подтверждена</td><td>То же самое: выключите Confirm email.</td></tr>
+<tr><td>Нет прав на это действие</td><td>Обычно у участника ещё нет подтверждения, либо SQL выполнен не полностью.</td></tr>
+<tr><td>Хранилище заполнено</td><td>Набрано 900 МБ. Удалите ненужные файлы на вкладке «Файлы».</td></tr>
+<tr><td>GitHub не открывается с этого устройства</td><td>Сеть или блокировка. Попробуйте позже. Фоновая сверка (шаг 9) не зависит от устройства.</td></tr>
+<tr><td>Репозиторий не найден или закрыт</td><td>Опечатка в названии или репозиторий приватный. Для приватного репозитория релизы подтянуть нельзя.</td></tr>
+<tr><td>GitHub временно ограничил запросы</td><td>Лимит GitHub для запросов без ключа. Подождите час.</td></tr>
+<tr><td>Страница пустая или белая</td><td>Сайт открыт двойным щелчком по index.html. Запускайте через веб-сервер (шаг 6) или выложите в интернет (шаг 7).</td></tr>
+<tr><td>Уведомления не приходят</td><td>Они работают только пока сайт открыт во вкладке или в установленном приложении. На iPhone сначала установите сайт на экран «Домой».</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="s11"><h2><span class="n">11</span>Хорошо знать</h2>
+<ul>
+<li><b>Бесплатный Supabase засыпает.</b> Проект без активности около недели ставится на паузу. Зайдите в панель Supabase и нажмите Restore, данные сохранятся. Если вы с художником пользуетесь сайтом хотя бы раз в неделю, этого не случится.</li>
+<li><b>Места 1 ГБ.</b> Сайт блокирует загрузки на 900 МБ, чтобы не выйти за лимит. Занято ли место, видно на вкладке «Файлы».</li>
+<li><b>Забытый пароль.</b> Восстановления нет. Выход: в Supabase откройте Authentication → Users, удалите аккаунт, и человек зарегистрируется заново (его старые сообщения останутся подписанными как «Удалённый участник»).</li>
+<li><b>Уведомления</b> приходят, пока сайт открыт во вкладке или в установленном приложении. Фоновых push-уведомлений при закрытом сайте здесь нет.</li>
+<li><b>Обновление сайта.</b> Замените изменённые файлы на хостинге. Если у телефона остался старый вид, обновите страницу дважды.</li>
+<li><b>Резервная копия.</b> Раз в какое-то время скачивайте важные спрайты из приложения. Бесплатный тариф Supabase не включает резервных копий.</li>
+</ul>
+</section>
+</div>
+<script>
+document.addEventListener("click", function (e) {
+  var b = e.target.closest(".copy");
+  if (!b) return;
+  var text = b.parentNode.querySelector("pre").innerText;
+  var done = function () { b.textContent = "Скопировано"; setTimeout(function () { b.textContent = "Копировать"; }, 1800); };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, function () { b.textContent = "Выделите вручную"; });
+  else { var r = document.createRange(); r.selectNodeContents(b.parentNode.querySelector("pre")); var s = getSelection(); s.removeAllRanges(); s.addRange(r); try { document.execCommand("copy"); done(); } catch (x) { b.textContent = "Выделите вручную"; } }
+});
+</script>
+</body>
+</html>
